@@ -1,7 +1,7 @@
 from flask import Flask
 
 from web_app.module.home.view import module_home
-from web_app.module.scrap_news.models_scrap_news import db_scrapt_news
+from web_app.module.scrap_news.models_scrap_news import db_scrap_news
 from web_app.module.scrap_news.views import module_scrap_news
 
 
@@ -15,7 +15,7 @@ def create_app():
     app.register_blueprint(module_scrap_news, url_prefix="/scrap")
 
     # register model
-    db_scrapt_news.init_app(app)
+    db_scrap_news.init_app(app)
 
 
     return app

@@ -22,7 +22,7 @@ sys.path.append(os.getcwd() + "/web_app/module/scrap_news")
 import models_scrap_news
 
 target_metadata = [
-    models_scrapt_news.db_scrap_news.Model.metadata
+    models_scrap_news.db_scrap_news.Model.metadata
 ]
 
 # other values from the config, defined by the needs of env.py,
