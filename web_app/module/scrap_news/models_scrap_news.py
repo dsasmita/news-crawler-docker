@@ -1,13 +1,16 @@
 import datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, DateTime, BigInteger, Text
+from sqlalchemy import Column, DateTime, BigInteger, Text, Integer, String
 
 db_scrap_news = SQLAlchemy()
 
 
-class Page(db_scrap_news.Model):
-    __tablename__ = 'master_news_post'
+class NewsPost(db_scrap_news.Model):
+    __tablename__ = 'news_post'
     id = Column(BigInteger, primary_key=True)
+    id_portal = Column(Integer)
+    link_news = Column(Text)
+    kanal_index = Column(Text)
     title = Column(Text)
     content = Column(Text)
     tags = Column(Text)
@@ -35,3 +38,17 @@ class Page(db_scrap_news.Model):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow)
 
+class Kanal(db_scrap_news.Model):
+    __tablename__ = 'news_kanal'
+    id = Column(BigInteger, primary_key=True)
+    id_portal = Column(Integer)
+    title = Column(String)
+    slug = Column(String)
+    description = Column(Text)
+
+class Portal(db_scrap_news.Model):
+    __tablename__ = 'portal'
+    id = Column(BigInteger, primary_key=True)
+    title = Column(String)
+    home_page = Column(String)
+    link_index = Column(String)

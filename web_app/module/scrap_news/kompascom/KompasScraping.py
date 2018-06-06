@@ -4,35 +4,57 @@ import requests
 
 class KompasScraping:
     def __init__(self):
-        self.link_list = ''
-        self.link_detail = ''
+        self.id_news = 0 # id news
+        self.link_index = '' # indeks link
+        self.link_list = '' # indeks want to scarp
 
-    def generate_index(self):
-        content = requests.get(self.link_list)
+    def generate_index(self, link_list):
+        if link_list == '':
+            return 'link_list not specified'
+
+        content = requests.get(link_list)
         bs = bs4.BeautifulSoup(content.text, "html.parser")
 
         index = [item['data-ci-pagination-page']
                  for item in bs.find_all('a', attrs={'data-ci-pagination-page': True})]
-        lastPage = int(index[len(index) - 1]) + 1
+        last_page = 0;
+        if len(index) > 0:
+            last_page = int(index[len(index) - 1]) + 1
 
         url_pagination = []
-        for i in range(1, lastPage):
-            url_pagination.append("%s/%s" % (self.link_list, i))
+        for i in range(1, last_page):
+            url_pagination.append("%s/%s" % (link_list, i))
 
         return url_pagination;
 
-    def generate_link(self):
-        url_pagination = self.generate_index()
-
+    def generate_link(self, link_list):
         news_link = []
-        for url in url_pagination:
-            content = requests.get(url)
-            response = bs4.BeautifulSoup(content.text, "html.parser")
-            list_link = response.find_all('a', 'article__link')
+        for lk in link_list:
+            url_pagination = self.generate_index(lk['link'])
 
-            for link in list_link:
-                news_link.append(link["href"])
+            if len(url_pagination) > 0:
+                for url in url_pagination:
+                    content = requests.get(url)
+                    response = bs4.BeautifulSoup(content.text, "html.parser")
+                    list_link = response.find_all('a', 'article__link')
 
+                    for link in list_link:
+                        tmp = {}
+                        tmp['href'] = link['href']
+                        tmp['title'] = link.get_text()
+                        tmp['kanal'] = lk['kanal']
+                        news_link.append(tmp)
+            else:
+                content = requests.get(lk['link'])
+                response = bs4.BeautifulSoup(content.text, "html.parser")
+                list_link = response.find_all('a', 'article__link')
+
+                for link in list_link:
+                    tmp = {}
+                    tmp['href'] = link['href']
+                    tmp['title'] = link.get_text()
+                    tmp['kanal'] = lk['kanal']
+                    news_link.append(tmp)
         return news_link
 
     def generate_content_all_news(self):
@@ -43,6 +65,22 @@ class KompasScraping:
             news.append(self.scarp_detail_news(link))
 
         return news
+
+    def get_kanal(self):
+        link_index = self.link_index
+        categories = []
+        if link_index == '':
+            return categories
+
+        content = requests.get(link_index)
+        response = bs4.BeautifulSoup(content.text, "html.parser")
+
+        categories_container = response.find('div','form__select__wrap')
+        for cat_option in categories_container.select('option'):
+            if(cat_option['value'] != 'topik-pilihan'):
+                categories.append(cat_option['value'])
+
+        return categories
 
     def scarp_detail_news(self, news_link):
         content = requests.get(news_link)
