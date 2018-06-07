@@ -1,6 +1,6 @@
 import datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, DateTime, BigInteger, Text, Integer, String
+from sqlalchemy import Column, DateTime, BigInteger, Text, Integer, String, Boolean
 
 db_scrap_news = SQLAlchemy()
 
@@ -11,12 +11,13 @@ class NewsPost(db_scrap_news.Model):
     id_portal = Column(Integer)
     link_news = Column(Text)
     kanal_index = Column(Text)
+    scrap_status = Column(Boolean, default=False)
     title = Column(Text)
     content = Column(Text)
     tags = Column(Text)
     category = Column(Text)
     category_sub = Column(Text)
-    date_publish = Column(DateTime, default=datetime.datetime.utcnow)
+    date_publish = Column(DateTime)
     image_link = Column(Text)
     image_link_alt = Column(Text)
     author = Column(Text)
@@ -31,7 +32,7 @@ class NewsPost(db_scrap_news.Model):
     meta_content_editor = Column(Text)
     meta_content_lipsus = Column(Text)
     meta_content_type = Column(Text)
-    meta_content_publish_date = Column(DateTime, default=datetime.datetime.utcnow)
+    meta_content_publish_date = Column(DateTime)
     meta_content_source = Column(Text)
     meta_content_tag = Column(Text)
     meta_content_total_words = Column(Text)

@@ -7,7 +7,7 @@ services:
             gunicorn -b 0.0.0.0:8000
             --access-logfile -
             --reload
-            --timeout 90
+            --timeout 5000
             "web_app.app:create_app()"
         environment:
             PYTHONUNBUFFERED: 'true'

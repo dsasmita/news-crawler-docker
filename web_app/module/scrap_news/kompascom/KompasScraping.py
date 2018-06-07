@@ -88,35 +88,48 @@ class KompasScraping:
 
         news = {}
         # title
-        news["title"] = response.find('h1','read__title').get_text()
+        try:
+            news["title"] = response.find('h1','read__title').get_text()
+        except:
+            news["title"] = ''
 
         # content
-        contens = response.find('div', 'read__content')
-        tmp_paragraf_news = []
-        for paragraf in contens.select('p'):
-            check = True
-            if paragraf.get_text().find('Baca juga') != -1:
-                check = False
+        try:
+            contens = response.find('div', 'read__content')
+            tmp_paragraf_news = []
+            for paragraf in contens.select('p'):
+                check = True
+                if paragraf.get_text().find('Baca juga') != -1:
+                    check = False
 
-            if check and paragraf.get_text().strip() != "":
-                tmp_paragraf_news.append('<p>%s</p>' %(paragraf.get_text().strip()))
+                if check and paragraf.get_text().strip() != "":
+                    tmp_paragraf_news.append('<p>%s</p>' %(paragraf.get_text().strip()))
 
-        news["content"] = ' '.join(tmp_paragraf_news)
+            news["content"] = ' '.join(tmp_paragraf_news)
+        except:
+            news["content"] = ''
 
         # tags
-        tags = response.find('ul', 'tag__article__wrap')
-        tmp_tags_array = []
-        for tag in tags.select('li'):
-            tmp_tags_array.append(tag.get_text().strip())
+        try:
+            tags = response.find('ul', 'tag__article__wrap')
+            tmp_tags_array = []
+            for tag in tags.select('li'):
+                tmp_tags_array.append(tag.get_text().strip())
 
-        news['tags'] = ', '.join(tmp_tags_array)
+            news['tags'] = ', '.join(tmp_tags_array)
+        except:
+            news['tags'] = ''
 
         # category
-        categories = response.find('ul', 'breadcrumb__wrap')
         tmp_category_array = []
-        for category in categories.select("li"):
-            if category.get_text().strip() != 'Home':
-                tmp_category_array.append(category.get_text().strip())
+        try:
+            categories = response.find('ul', 'breadcrumb__wrap')
+            tmp_category_array = []
+            for category in categories.select("li"):
+                if category.get_text().strip() != 'Home':
+                    tmp_category_array.append(category.get_text().strip())
+        except:
+            tmp_category_array = []
 
         try:
             news['category'] = tmp_category_array[0]
@@ -129,17 +142,24 @@ class KompasScraping:
             news['category_sub'] = 'empty'
 
         # date_publish
-        date_time = response.find('div', 'read__time').get_text()
-        date_before_format = date_time.replace('Kompas.com - ', '')
-        date_time_array = date_before_format.split(',')
-        date_array = date_time_array[0].split('/')
-        time_array = date_time_array[1].split(' ')
-        news['date_publish'] =  '%s-%s-%s %s' % (date_array[2], date_array[1], date_array[0], time_array[1])
+        try:
+            date_time = response.find('div', 'read__time').get_text()
+            date_before_format = date_time.replace('Kompas.com - ', '')
+            date_time_array = date_before_format.split(',')
+            date_array = date_time_array[0].split('/')
+            time_array = date_time_array[1].split(' ')
+            news['date_publish'] =  '%s-%s-%s %s' % (date_array[2], date_array[1], date_array[0], time_array[1])
+        except:
+            news['date_publish'] = ''
 
         # image_link
-        photos = response.find('div','photo')
-        news['image_link'] = photos.img['src']
-        news['image_link_alt'] = photos.img['alt']
+        try:
+            photos = response.find('div','photo')
+            news['image_link'] = photos.img['src']
+            news['image_link_alt'] = photos.img['alt']
+        except:
+            news['image_link'] = ''
+            news['image_link_alt'] = ''
 
         # author
         author = response.find('div', {'id' : 'penulis'})
@@ -149,18 +169,38 @@ class KompasScraping:
             news['author'] = 'empty'
 
         # editor
-        editor = response.find('div', {'id': 'editor'})
-        news['editor'] = editor.a.get_text()
+        try:
+            editor = response.find('div', {'id': 'editor'})
+            news['editor'] = editor.a.get_text()
+        except:
+            news['editor'] = ''
 
         # meta data
         metas = response.find_all('meta')
+        news['meta_description'] = ''
+        news['meta_keyword'] = ''
+        news['meta_content_category'] = ''
+        news['meta_content_category_sub'] = ''
+        news['meta_content_location'] = ''
+        news['meta_content_author'] = ''
+        news['meta_content_editor'] = ''
+        news['meta_content_lipsus'] = ''
+        news['meta_content_type'] = ''
+        news['meta_content_publish_date'] = ''
+        news['meta_content_source'] = ''
+        news['meta_content_tag'] = ''
+        news['meta_content_total_words'] = ''
+        news['meta_content_publish_date'] = ''
+
         for meta in metas:
             if 'name' in meta.attrs:
                 if meta.attrs['name'] == 'description':
                     news['meta_description'] = meta.attrs['content']
+                elif meta.attrs['name'] == 'keywords':
+                    news['meta_keyword'] = meta.attrs['content']
                 elif meta.attrs['name'] == 'content_category':
                     news['meta_content_category'] = meta.attrs['content']
-                elif meta.attrs['name'] == 'content_category_sub':
+                elif meta.attrs['name'] == 'content_subcategory':
                     news['meta_content_category_sub'] = meta.attrs['content']
                 elif meta.attrs['name'] == 'content_location':
                     news['meta_content_location'] = meta.attrs['content']

@@ -1,8 +1,8 @@
 """initial DB
 
-Revision ID: 599fb3f09bc1
+Revision ID: 222c0a2ed62a
 Revises: 
-Create Date: 2018-06-06 14:59:32.113633
+Create Date: 2018-06-07 09:51:02.723551
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '599fb3f09bc1'
+revision = '222c0a2ed62a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,6 +31,7 @@ def upgrade():
     sa.Column('id_portal', sa.Integer(), nullable=True),
     sa.Column('link_news', sa.Text(), nullable=True),
     sa.Column('kanal_index', sa.Text(), nullable=True),
+    sa.Column('scrap_status', sa.Boolean(), nullable=True),
     sa.Column('title', sa.Text(), nullable=True),
     sa.Column('content', sa.Text(), nullable=True),
     sa.Column('tags', sa.Text(), nullable=True),
