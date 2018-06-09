@@ -1,19 +1,23 @@
 from flask import Blueprint, jsonify, request
 import datetime
+
+from web_app.module.scrap_news.detikcom.DetikScraping import DetikScraping
 from web_app.module.scrap_news.kompascom import KompasScraping
 from web_app.module.scrap_news.kompascom.KompasScraping import KompasScraping
 from web_app.module.scrap_news.models_scrap_news import Portal, Kanal, db_scrap_news, NewsPost
 
+
 module_scrap_news = Blueprint(
-    'module_scrap_news',  # name of module
-    __name__,
-    template_folder='templates'  # templates folder
+        'module_scrap_news',
+        __name__,
+        template_folder='templates'
 )
 
 
 @module_scrap_news.route('/')
 def index():
     return 'This is landing for scrap'
+
 
 # kompas
 @module_scrap_news.route('/kompas/scrap/list')
@@ -30,22 +34,21 @@ def kompas_scrap_list():
     if check_kompas == 0:
         return 'news portal kompas not added yet'
 
-    portal = Portal.query.filter_by(title = 'kompas.com').first()
-    kanals = Kanal.query.filter_by(id_portal = portal.id).all()
+    portal = Portal.query.filter_by(title='kompas.com').first()
+    kanals = Kanal.query.filter_by(id_portal=portal.id).all()
 
     kanal_list = []
     for kn in kanals:
         tmp = {}
-        tmp['link'] = 'https://indeks.kompas.com/' + kn.title +'/'+date_scrap
+        tmp['link'] = 'https://indeks.kompas.com/' + kn.title + '/' + date_scrap
         tmp['kanal'] = kn.title
         kanal_list.append(tmp)
 
     kompas = KompasScraping()
     link_news = kompas.generate_link(kanal_list)
 
-
     for link in link_news:
-        check = NewsPost.query.filter_by(link_news = link['href']).count()
+        check = NewsPost.query.filter_by(link_news=link['href']).count()
         if check == 0:
             news = NewsPost()
             news.link_news = link['href']
@@ -56,7 +59,7 @@ def kompas_scrap_list():
             db_scrap_news.session.add(news)
             db_scrap_news.session.commit()
         else:
-            news = NewsPost.query.filter_by(link_news = link['href']).first()
+            news = NewsPost.query.filter_by(link_news=link['href']).first()
             if link['kanal'] not in news.kanal_index:
                 news.kanal_index = news.kanal_index + ', ' + link['kanal']
                 db_scrap_news.session.add(news)
@@ -66,21 +69,22 @@ def kompas_scrap_list():
     print(datetime.datetime.now())
     return str(len(link_news)) + ' news list post scrap from kompas.com'
 
+
 @module_scrap_news.route('/kompas/category-insert')
 def kompas_category_insert():
-    check_kompas = Portal.query.filter_by(title = 'kompas.com').count()
+    check_kompas = Portal.query.filter_by(title='kompas.com').count()
     if check_kompas == 0:
         return 'news portal kompas not added yet'
 
-    portal = Portal.query.filter_by(title = 'kompas.com').first()
+    portal = Portal.query.filter_by(title='kompas.com').first()
 
     kompas = KompasScraping()
     kompas.id_news = portal.id
     kompas.link_index = portal.link_index
-    kanals = kompas.get_kanal();
+    kanals = kompas.get_kanal;
 
     for kn in kanals:
-        check_category = Kanal.query.filter_by(slug = kn).count()
+        check_category = Kanal.query.filter_by(slug=kn).count()
         if check_category == 0:
             kanal = Kanal()
             kanal.id_portal = portal.id
@@ -93,6 +97,7 @@ def kompas_category_insert():
 
     return 'category inserted'
 
+
 @module_scrap_news.route('kompas/scrap/detail')
 def kompas_scrap_detail():
     limit = request.args.get('limit', 20)
@@ -103,15 +108,13 @@ def kompas_scrap_detail():
     print('......')
     print('......')
 
-    news_posts = NewsPost.query.filter_by(scrap_status = False).\
-        order_by(NewsPost.id.asc()).\
-        limit(limit).all()
+    news_posts = NewsPost.query.filter_by(scrap_status=False).order_by(NewsPost.id.asc()).limit(limit).all()
 
     kompas = KompasScraping()
 
     i = 0
     for news in news_posts:
-        print(str(i+1)+ ': ' + str(datetime.datetime.now()))
+        print(str(i + 1) + ': ' + str(datetime.datetime.now()))
         print(news.link_news)
         content = kompas.scarp_detail_news(news.link_news)
         news.scrap_status = True
@@ -154,7 +157,37 @@ def kompas_scrap_detail():
 
         i = i + 1
 
-    print(str(i)+' news scarp')
+    print(str(i) + ' news scarp')
     print('done ....')
     print(datetime.datetime.now())
-    return str(i)+' news scarp'
+    return str(i) + ' news scarp'
+
+# Detik
+@module_scrap_news.route('/detik/category-insert')
+def detik_category_insert():
+    check_kompas = Portal.query.filter_by(title='detik.com').count()
+    if check_kompas == 0:
+        return 'news portal detik not added yet'
+
+    portal = Portal.query.filter_by(title='detik.com').first()
+
+    detik = DetikScraping()
+    detik.id_news = portal.id
+    detik.link_index = portal.link_index
+    kanals = detik.get_kanal
+
+    for kn in kanals:
+        # check_category = Kanal.query.filter_by(slug=kn).count()
+        print(kn['title'])
+        print(kn['slug'])
+        # if check_category == 0:
+        #     kanal = Kanal()
+        #     kanal.id_portal = portal.id
+        #     kanal.title = kn
+        #     kanal.slug = kn
+        #     kanal.description = kn
+        #
+        #     db_scrap_news.session.add(kanal)
+        #     db_scrap_news.session.commit()
+
+    return 'category inserted'

@@ -12,7 +12,7 @@ class KompasScraping:
         if link_list == '':
             return 'link_list not specified'
 
-        content = requests.get(link_list)
+        content = requests.get(link_list, timeout=10)
         bs = bs4.BeautifulSoup(content.text, "html.parser")
 
         index = [item['data-ci-pagination-page']
@@ -34,7 +34,7 @@ class KompasScraping:
 
             if len(url_pagination) > 0:
                 for url in url_pagination:
-                    content = requests.get(url)
+                    content = requests.get(url, timeout=10)
                     response = bs4.BeautifulSoup(content.text, "html.parser")
                     list_link = response.find_all('a', 'article__link')
 
@@ -45,7 +45,7 @@ class KompasScraping:
                         tmp['kanal'] = lk['kanal']
                         news_link.append(tmp)
             else:
-                content = requests.get(lk['link'])
+                content = requests.get(lk['link'], timeout=10)
                 response = bs4.BeautifulSoup(content.text, "html.parser")
                 list_link = response.find_all('a', 'article__link')
 
@@ -72,7 +72,7 @@ class KompasScraping:
         if link_index == '':
             return categories
 
-        content = requests.get(link_index)
+        content = requests.get(link_index, timeout=10)
         response = bs4.BeautifulSoup(content.text, "html.parser")
 
         categories_container = response.find('div','form__select__wrap')
@@ -83,7 +83,7 @@ class KompasScraping:
         return categories
 
     def scarp_detail_news(self, news_link):
-        content = requests.get(news_link)
+        content = requests.get(news_link, timeout=10)
         response = bs4.BeautifulSoup(content.text, "html.parser")
 
         news = {}
