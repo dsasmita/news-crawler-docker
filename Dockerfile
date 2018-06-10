@@ -14,4 +14,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD gunicorn -b 0.0.0.0:8000 --timeout 5000 --access-logfile - "web_app.app:create_app() "
+CMD gunicorn -b 0.0.0.0:8000 --timeout 90 --access-logfile - "web_app.app:create_app() "

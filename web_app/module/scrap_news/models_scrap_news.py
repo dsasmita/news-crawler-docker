@@ -45,6 +45,7 @@ class Kanal(db_scrap_news.Model):
     id_portal = Column(Integer)
     title = Column(String)
     slug = Column(String)
+    type = Column(String)
     description = Column(Text)
 
 class Portal(db_scrap_news.Model):

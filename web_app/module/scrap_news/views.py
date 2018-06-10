@@ -95,7 +95,7 @@ def kompas_category_insert():
             db_scrap_news.session.add(kanal)
             db_scrap_news.session.commit()
 
-    return 'category inserted'
+    return 'Kompas: category inserted'
 
 
 @module_scrap_news.route('kompas/scrap/detail')
@@ -163,6 +163,63 @@ def kompas_scrap_detail():
     return str(i) + ' news scarp'
 
 # Detik
+@module_scrap_news.route('/detik/scrap/list')
+def detik_scrap_list():
+    date_scrap = request.args.get('date', datetime.datetime.now().strftime('%d/%m/%Y'))
+
+    print('start ....')
+    print(datetime.datetime.now())
+    print('......')
+    print('......')
+    print('......')
+
+    check_kompas = Portal.query.filter_by(title='detik.com').count()
+    if check_kompas == 0:
+        return 'news portal detik not added yet'
+
+    portal = Portal.query.filter_by(title='detik.com').first()
+    kanals = Kanal.query.filter_by(id_portal=portal.id).all()
+
+    kanal_list = []
+    for kn in kanals:
+        link = kn.slug
+        link_array = link.split('?')
+        link = link_array[0]
+        tmp = {}
+        tmp['link'] = 'https://' + link + '?date=' + date_scrap
+        tmp['link_ori'] = 'https://' + link
+        tmp['kanal'] = kn.title
+        tmp['type'] = kn.type
+        tmp['date'] = date_scrap
+        kanal_list.append(tmp)
+
+    detik = DetikScraping()
+    link_news = detik.generate_link(kanal_list)
+
+
+
+    # for link in link_news:
+    #     check = NewsPost.query.filter_by(link_news=link['href']).count()
+    #     if check == 0:
+    #         news = NewsPost()
+    #         news.link_news = link['href']
+    #         news.id_portal = portal.id
+    #         news.title = link['title']
+    #         news.kanal_index = link['kanal']
+    #
+    #         db_scrap_news.session.add(news)
+    #         db_scrap_news.session.commit()
+    #     else:
+    #         news = NewsPost.query.filter_by(link_news=link['href']).first()
+    #         if link['kanal'] not in news.kanal_index:
+    #             news.kanal_index = news.kanal_index + ', ' + link['kanal']
+    #             db_scrap_news.session.add(news)
+    #             db_scrap_news.session.commit()
+
+    print('Done')
+    print(datetime.datetime.now())
+    return str(len(link_news)) + ' news list post scrap from detik.com'
+
 @module_scrap_news.route('/detik/category-insert')
 def detik_category_insert():
     check_kompas = Portal.query.filter_by(title='detik.com').count()
@@ -177,17 +234,15 @@ def detik_category_insert():
     kanals = detik.get_kanal
 
     for kn in kanals:
-        # check_category = Kanal.query.filter_by(slug=kn).count()
-        print(kn['title'])
-        print(kn['slug'])
-        # if check_category == 0:
-        #     kanal = Kanal()
-        #     kanal.id_portal = portal.id
-        #     kanal.title = kn
-        #     kanal.slug = kn
-        #     kanal.description = kn
-        #
-        #     db_scrap_news.session.add(kanal)
-        #     db_scrap_news.session.commit()
+        check_category = Kanal.query.filter_by(slug=kn['slug']).count()
+        if check_category == 0:
+            kanal = Kanal()
+            kanal.id_portal = portal.id
+            kanal.title = kn['title']
+            kanal.slug = kn['slug']
+            kanal.description = kn['slug']
 
-    return 'category inserted'
+            db_scrap_news.session.add(kanal)
+            db_scrap_news.session.commit()
+
+    return 'Detik: category inserted'
